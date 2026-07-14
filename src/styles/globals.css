@@ -1,0 +1,4 @@
+@keyframes dot-blink {
+  0%, 80%, 100% { opacity: 0.15; }
+  40%            { opacity: 1;    }
+}

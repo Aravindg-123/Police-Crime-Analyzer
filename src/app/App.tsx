@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
 import kspLogo from "../imports/image-12.png";
 import {
@@ -24,6 +24,88 @@ const AD  = "#92610a";   // amber-dark (text on amber bg)
 type AppView = "landing" | "chatbot" | "dashboards" | "settings" | "feedback";
 
 const NAV_LINKS = ["Home", "About", "FIR Search", "Contact"];
+
+/* ─── Translations ───────────────────────────────────────── */
+const T = {
+  en: {
+    deptName:       "Karnataka State Police",
+    deptSub:        "Intelligence Command Center · ಕರ್ನಾಟಕ ರಾಜ್ಯ ಪೊಲೀಸ್ ಗುಪ್ತಚರ ಕೇಂದ್ರ",
+    deptGov:        "Government of Karnataka · Department of Home Affairs",
+    login:          "Login",
+    signOut:        "Sign Out",
+    feedback:       "Feedback",
+    nav:            ["Home", "About", "FIR Search", "Contact"],
+    updates:        "Updates",
+    breadcrumb:     "Intelligence Command Center",
+    breadHome:      "Home",
+    systemOp:       "System Operational",
+    lastUpdated:    "Last updated: Today, 10:42 IST",
+    policeDesk:     "Police Desk",
+    crimeDesk:      "Crime Analysis Desk",
+    signInPrompt:   "Sign in",
+    signInSuffix:   "to access the intelligence tools below.",
+    accessGranted:  "Access granted — Insp. K. Rajesh (Level 3)",
+    notices:        "Official Notices",
+    viewAll:        "View all notices →",
+    footer1:        "© 2025 Karnataka State Police · Government of Karnataka · All rights reserved",
+    footer2:        "Designed & Hosted by NIC Karnataka · Version 2.4.1",
+    desk: [
+      { label: "Legal Guidelines",        badge: "OPEN" },
+      { label: "FIR Search",              badge: null },
+      { label: "Seva Sindhu",             badge: null },
+      { label: "Officers Centric Portal", badge: null },
+      { label: "KSP e-Lost Reports",      badge: null },
+      { label: "Tenders & Procurement",   badge: null },
+      { label: "RTI Requests",            badge: null },
+      { label: "Important Links",         badge: null },
+      { label: "Police Station Locator",  badge: null },
+    ],
+    tools: [
+      { label: "AI Crime Analysis Cases",    sub: "Natural language queries on crime data & suspects",       meta: "23 queries · Avg response 1.4s · Model: KSP-APT v2.1" },
+      { label: "Criminal Records Search",    sub: "FIR lookup, history & suspect profiles",                  meta: "4,283 records indexed today · Latency: 32ms · Sources: 6" },
+      { label: "District Intelligence Map",  sub: "Real-time district-level alert monitoring",               meta: "3 HIGH · 12 MEDIUM · 14 NORMAL · Last sync: 8 min ago" },
+    ],
+  },
+  kn: {
+    deptName:       "ಕರ್ನಾಟಕ ರಾಜ್ಯ ಪೊಲೀಸ್",
+    deptSub:        "ಗುಪ್ತಚರ ಕಮಾಂಡ್ ಕೇಂದ್ರ · Karnataka State Police Intelligence Command Center",
+    deptGov:        "ಕರ್ನಾಟಕ ಸರ್ಕಾರ · ಗೃಹ ವ್ಯವಹಾರಗಳ ಇಲಾಖೆ",
+    login:          "ಲಾಗಿನ್",
+    signOut:        "ಸೈನ್ ಔಟ್",
+    feedback:       "ಪ್ರತಿಕ್ರಿಯೆ",
+    nav:            ["ಮುಖಪುಟ", "ನಮ್ಮ ಬಗ್ಗೆ", "ಎಫ್‌ಐಆರ್ ಹುಡುಕಾಟ", "ಸಂಪರ್ಕ"],
+    updates:        "ಅಪ್‌ಡೇಟ್‌ಗಳು",
+    breadcrumb:     "ಗುಪ್ತಚರ ಕಮಾಂಡ್ ಕೇಂದ್ರ",
+    breadHome:      "ಮುಖಪುಟ",
+    systemOp:       "ವ್ಯವಸ್ಥೆ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಿದೆ",
+    lastUpdated:    "ಕೊನೆಯ ಅಪ್‌ಡೇಟ್: ಇಂದು, 10:42 IST",
+    policeDesk:     "ಪೊಲೀಸ್ ಡೆಸ್ಕ್",
+    crimeDesk:      "ಅಪರಾಧ ವಿಶ್ಲೇಷಣಾ ಕೇಂದ್ರ",
+    signInPrompt:   "ಸೈನ್ ಇನ್ ಮಾಡಿ",
+    signInSuffix:   "ಗುಪ್ತಚರ ಉಪಕರಣಗಳನ್ನು ಬಳಸಲು.",
+    accessGranted:  "ಪ್ರವೇಶ ಮಂಜೂರು — ಇನ್ಸ್ಪೆ. ಕೆ. ರಾಜೇಶ್ (ಮಟ್ಟ 3)",
+    notices:        "ಅಧಿಕೃತ ಸೂಚನೆಗಳು",
+    viewAll:        "ಎಲ್ಲಾ ಸೂಚನೆಗಳನ್ನು ನೋಡಿ →",
+    footer1:        "© 2025 ಕರ್ನಾಟಕ ರಾಜ್ಯ ಪೊಲೀಸ್ · ಕರ್ನಾಟಕ ಸರ್ಕಾರ · ಎಲ್ಲ ಹಕ್ಕುಗಳನ್ನು ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ",
+    footer2:        "NIC ಕರ್ನಾಟಕದಿಂದ ವಿನ್ಯಾಸಗೊಳಿಸಲಾಗಿದೆ · ಆವೃತ್ತಿ 2.4.1",
+    desk: [
+      { label: "ಕಾನೂನು ಮಾರ್ಗದರ್ಶಿಗಳು",      badge: "ತೆರೆದಿದೆ" },
+      { label: "ಎಫ್‌ಐಆರ್ ಹುಡುಕಾಟ",           badge: null },
+      { label: "ಸೇವಾ ಸಿಂಧು",                 badge: null },
+      { label: "ಅಧಿಕಾರಿ ಕೇಂದ್ರಿತ ಪೋರ್ಟಲ್",  badge: null },
+      { label: "KSP ಇ-ಕಳೆದ ವರದಿಗಳು",        badge: null },
+      { label: "ಟೆಂಡರ್ ಮತ್ತು ಖರೀದಿ",        badge: null },
+      { label: "RTI ವಿನಂತಿಗಳು",             badge: null },
+      { label: "ಮುಖ್ಯ ಕೊಂಡಿಗಳು",             badge: null },
+      { label: "ಪೊಲೀಸ್ ಠಾಣೆ ಸ್ಥಳ",          badge: null },
+    ],
+    tools: [
+      { label: "AI ಅಪರಾಧ ವಿಶ್ಲೇಷಣಾ ಪ್ರಕರಣಗಳು", sub: "ಅಪರಾಧ ಡೇಟಾ ಮತ್ತು ಸಂಶಯಾಸ್ಪದರ ಸರಳ ಭಾಷೆಯ ಪ್ರಶ್ನೆಗಳು",  meta: "23 ಪ್ರಶ್ನೆಗಳು · ಸರಾಸರಿ 1.4s · ಮಾದರಿ: KSP-APT v2.1" },
+      { label: "ಅಪರಾಧ ದಾಖಲೆ ಹುಡುಕಾಟ",         sub: "ಎಫ್‌ಐಆರ್ ಹುಡುಕಾಟ, ಇತಿಹಾಸ ಮತ್ತು ಸಂಶಯಾಸ್ಪದ ಪ್ರೊಫೈಲ್‌ಗಳು", meta: "ಇಂದು 4,283 ದಾಖಲೆಗಳು · ವಿಳಂಬ: 32ms · ಮೂಲಗಳು: 6" },
+      { label: "ಜಿಲ್ಲಾ ಗುಪ್ತಚರ ನಕ್ಷೆ",          sub: "ನೈಜ-ಸಮಯ ಜಿಲ್ಲಾ ಮಟ್ಟದ ಎಚ್ಚರಿಕೆ ಮೇಲ್ವಿಚಾರಣೆ",          meta: "3 ಉನ್ನತ · 12 ಮಧ್ಯಮ · 14 ಸಾಮಾನ್ಯ · ಕೊನೆಯ ಸಿಂಕ್: 8 ನಿ" },
+    ],
+  },
+} as const;
 
 const TICKER_ITEMS = [
   "Data sync completed across 4 districts — 1,204 records updated",
@@ -171,6 +253,15 @@ function LandingPage({
     >{label}</button>
   );
 
+  const t = T[activeLang];
+
+  const NAV_URLS = [
+    null,
+    "https://ksp.karnataka.gov.in/page/About+Us/Vision+Statement/en",
+    "https://ksp.karnataka.gov.in/firsearch/en",
+    "https://ksp.karnataka.gov.in/ksp_contact/en",
+  ];
+
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", fontFamily: F, background: BG, color: TX, fontSize: 14, lineHeight: 1.5 }}>
 
@@ -179,15 +270,9 @@ function LandingPage({
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", gap: 18 }}>
           <GovEmblem />
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 18, fontWeight: 700, color: WH, lineHeight: 1.2 }}>
-              Karnataka State Police
-            </div>
-            <div style={{ fontSize: 12.5, color: "rgba(255,255,255,0.6)", marginTop: 3 }}>
-              Intelligence Command Center &nbsp;·&nbsp; ಕರ್ನಾಟಕ ರಾಜ್ಯ ಪೊಲೀಸ್ ಗುಪ್ತಚರ ಕೇಂದ್ರ
-            </div>
-            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 2 }}>
-              Government of Karnataka · Department of Home Affairs
-            </div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: WH, lineHeight: 1.2 }}>{t.deptName}</div>
+            <div style={{ fontSize: 12.5, color: "rgba(255,255,255,0.6)", marginTop: 3 }}>{t.deptSub}</div>
+            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 2 }}>{t.deptGov}</div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <div style={{ display: "flex", gap: 8, fontSize: 13 }}>
@@ -205,10 +290,8 @@ function LandingPage({
               style={{ background: "none", border: "none", cursor: "pointer", fontFamily: F, fontSize: 13, color: "rgba(255,255,255,0.75)", fontWeight: 500, padding: 0 }}
               onMouseEnter={e => e.currentTarget.style.color = WH}
               onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.75)"}
-            >Feedback</button>
-            {loggedIn
-              ? btn("Sign Out", onLogout)
-              : btn("Login", onLogin)}
+            >{t.feedback}</button>
+            {loggedIn ? btn(t.signOut, onLogout) : btn(t.login, onLogin)}
           </div>
         </div>
       </header>
@@ -216,42 +299,25 @@ function LandingPage({
       {/* ══ NAV ══ */}
       <nav style={{ background: WH, borderBottom: `1px solid ${BD}` }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "flex" }}>
-          {NAV_LINKS.map(link => {
-            const external: Record<string, string> = {
-              "About":      "https://ksp.karnataka.gov.in/page/About+Us/Vision+Statement/en",
-              "FIR Search": "https://ksp.karnataka.gov.in/firsearch/en",
-              "Contact":    "https://ksp.karnataka.gov.in/ksp_contact/en",
-            };
-            return (
-              <button key={link}
-                onClick={() => {
-                  if (external[link]) { window.open(external[link], "_blank", "noopener"); return; }
-                  setActiveNav(link);
-                }}
-                style={{
-                  padding: "11px 18px",
-                  border: "none",
-                  borderBottom: activeNav === link ? `2px solid ${AMB}` : "2px solid transparent",
-                  background: "transparent",
-                  color: activeNav === link ? NAV : MU,
-                  fontSize: 13,
-                  fontWeight: activeNav === link ? 600 : 400,
-                  cursor: "pointer",
-                  fontFamily: F,
-                  marginBottom: -1,
-                }}
-                onMouseEnter={e => { if (activeNav !== link) e.currentTarget.style.color = NAV; }}
-                onMouseLeave={e => { if (activeNav !== link) e.currentTarget.style.color = MU; }}
-              >{link}</button>
-            );
-          })}
+          {t.nav.map((label, idx) => (
+            <button key={label}
+              onClick={() => {
+                const url = NAV_URLS[idx];
+                if (url) { window.open(url, "_blank", "noopener"); return; }
+                setActiveNav(label);
+              }}
+              style={{ padding: "11px 18px", border: "none", borderBottom: activeNav === label || (idx === 0 && activeNav === "Home") ? `2px solid ${AMB}` : "2px solid transparent", background: "transparent", color: (activeNav === label || (idx === 0 && activeNav === "Home")) ? NAV : MU, fontSize: 13, fontWeight: (activeNav === label || (idx === 0 && activeNav === "Home")) ? 600 : 400, cursor: "pointer", fontFamily: F, marginBottom: -1 }}
+              onMouseEnter={e => e.currentTarget.style.color = NAV}
+              onMouseLeave={e => { if (activeNav !== label && !(idx === 0 && activeNav === "Home")) e.currentTarget.style.color = MU; }}
+            >{label}</button>
+          ))}
         </div>
       </nav>
 
       {/* ══ TICKER ══ */}
       <div style={{ borderLeft: `4px solid ${AMB}`, background: "#fefbf0", borderBottom: `1px solid #e2d5a8`, overflow: "hidden" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "5px 24px", display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: AD, flexShrink: 0, textTransform: "uppercase", letterSpacing: "0.06em" }}>Updates</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: AD, flexShrink: 0, textTransform: "uppercase", letterSpacing: "0.06em" }}>{t.updates}</span>
           <span style={{ color: BD, fontSize: 12 }}>|</span>
           <div style={{ overflow: "hidden", flex: 1 }}>
             <div style={{ display: "flex", animation: "ticker 32s linear infinite", whiteSpace: "nowrap" }}>
@@ -267,34 +333,34 @@ function LandingPage({
       <div style={{ background: WH, borderBottom: `1px solid ${BD}`, padding: "6px 0" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: MU }}>
-            <span style={{ fontWeight: 600, color: NAV }}>Intelligence Command Center</span>
+            <span style={{ fontWeight: 600, color: NAV }}>{t.breadcrumb}</span>
             <span>›</span>
-            <span>Home</span>
+            <span>{t.breadHome}</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: GR, display: "inline-block" }} />
-            <span style={{ color: GR, fontWeight: 600 }}>System Operational</span>
+            <span style={{ color: GR, fontWeight: 600 }}>{t.systemOp}</span>
             <span style={{ color: BD }}>|</span>
-            <span style={{ color: MU }}>Last updated: Today, 10:42 IST</span>
+            <span style={{ color: MU }}>{t.lastUpdated}</span>
           </div>
         </div>
       </div>
 
-      {/* ══ MAIN 3-COLUMN ══ */}
+      {/* ══ MAIN ══ */}
       <main style={{ flex: 1, padding: "20px 0 40px" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "grid", gridTemplateColumns: "1fr 250px", gap: 20, alignItems: "start" }}>
 
           {/* Crime Analysis Desk */}
           <section>
             <div style={{ marginBottom: 14, paddingBottom: 12, borderBottom: `1px solid ${BD}` }}>
-              <h2 style={{ fontSize: 15, fontWeight: 700, color: TX, margin: "0 0 5px" }}>Crime Analysis Desk</h2>
+              <h2 style={{ fontSize: 15, fontWeight: 700, color: TX, margin: "0 0 5px" }}>{t.crimeDesk}</h2>
               {!loggedIn ? (
                 <p style={{ fontSize: 12, color: MU, margin: 0 }}>
-                  <button onClick={onLogin} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: F, color: NAV, fontWeight: 600, fontSize: 12, padding: 0, textDecoration: "underline" }}>Sign in</button>
-                  {" "}to access the intelligence tools below.
+                  <button onClick={onLogin} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: F, color: NAV, fontWeight: 600, fontSize: 12, padding: 0, textDecoration: "underline" }}>{t.signInPrompt}</button>
+                  {" "}{t.signInSuffix}
                 </p>
               ) : (
-                <p style={{ fontSize: 12, color: GR, margin: 0, fontWeight: 500 }}>● Access granted — Insp. K. Rajesh (Level 3)</p>
+                <p style={{ fontSize: 12, color: GR, margin: 0, fontWeight: 500 }}>● {t.accessGranted}</p>
               )}
             </div>
 
@@ -305,29 +371,32 @@ function LandingPage({
             )}
 
             <div>
-              {DESK_TOOLS.map(({ id, label, sub, icon: Icon, meta, accent }, i) => (
-                <button key={id} onClick={() => handleTool(id)}
-                  style={{ display: "flex", alignItems: "flex-start", gap: 14, padding: "14px 16px", width: "100%", background: WH, border: `1px solid ${BD}`, borderTop: i > 0 ? "none" : `1px solid ${BD}`, borderLeft: `4px solid ${accent}`, cursor: "pointer", textAlign: "left", fontFamily: F }}
-                  onMouseEnter={e => e.currentTarget.style.background = "#f3f7fc"}
-                  onMouseLeave={e => e.currentTarget.style.background = WH}
-                >
-                  <div style={{ width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: "#edf2f9", border: `1px solid #d0daea`, marginTop: 1 }}>
-                    <Icon size={16} color={NAV} />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: TX, lineHeight: 1.3, marginBottom: 3 }}>{label}</div>
-                    <div style={{ fontSize: 12, color: MU, marginBottom: 8 }}>{sub}</div>
-                    <div style={{ fontSize: 11, color: "#8a9ab0", paddingTop: 8, borderTop: `1px solid #eef1f6` }}>{meta}</div>
-                  </div>
-                  <ChevronRight size={14} color="#8a9ab0" style={{ marginTop: 10, flexShrink: 0 }} />
-                </button>
-              ))}
+              {DESK_TOOLS.map(({ id, icon: Icon, accent }, i) => {
+                const tool = t.tools[i];
+                return (
+                  <button key={id} onClick={() => handleTool(id)}
+                    style={{ display: "flex", alignItems: "flex-start", gap: 14, padding: "14px 16px", width: "100%", background: WH, border: `1px solid ${BD}`, borderTop: i > 0 ? "none" : `1px solid ${BD}`, borderLeft: `4px solid ${accent}`, cursor: "pointer", textAlign: "left", fontFamily: F }}
+                    onMouseEnter={e => e.currentTarget.style.background = "#f3f7fc"}
+                    onMouseLeave={e => e.currentTarget.style.background = WH}
+                  >
+                    <div style={{ width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: "#edf2f9", border: `1px solid #d0daea`, marginTop: 1 }}>
+                      <Icon size={16} color={NAV} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: TX, lineHeight: 1.3, marginBottom: 3 }}>{tool.label}</div>
+                      <div style={{ fontSize: 12, color: MU, marginBottom: 8 }}>{tool.sub}</div>
+                      <div style={{ fontSize: 11, color: "#8a9ab0", paddingTop: 8, borderTop: `1px solid #eef1f6` }}>{tool.meta}</div>
+                    </div>
+                    <ChevronRight size={14} color="#8a9ab0" style={{ marginTop: 10, flexShrink: 0 }} />
+                  </button>
+                );
+              })}
             </div>
           </section>
 
-          {/* RIGHT: Official Notices */}
+          {/* Official Notices */}
           <aside>
-            <PanelHead label="Official Notices" />
+            <PanelHead label={t.notices} />
             <div style={{ background: WH, border: `1px solid ${BD}`, borderTop: "none" }}>
               {WHATS_NEW.map(({ tag, priority, title, id, date }, i, arr) => (
                 <div key={id}
@@ -348,7 +417,7 @@ function LandingPage({
               ))}
               <div style={{ padding: "8px 12px", borderTop: `1px solid ${BD}` }}>
                 <button onClick={() => window.open("https://ksp.karnataka.gov.in/english", "_blank", "noopener")} style={{ background: "none", border: "none", cursor: "pointer", color: NAV, fontSize: 12, fontWeight: 600, fontFamily: F, padding: 0, textDecoration: "underline" }}>
-                  View all notices →
+                  {t.viewAll}
                 </button>
               </div>
             </div>
@@ -360,12 +429,8 @@ function LandingPage({
       {/* ══ FOOTER ══ */}
       <footer style={{ background: NAV, borderTop: `3px solid ${AMB}`, padding: "14px 0" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>
-            © 2025 Karnataka State Police · Government of Karnataka · All rights reserved
-          </span>
-          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
-            Designed &amp; Hosted by NIC Karnataka · Version 2.4.1
-          </span>
+          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>{t.footer1}</span>
+          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>{t.footer2}</span>
         </div>
       </footer>
     </div>
@@ -395,7 +460,9 @@ function FeedbackPage({ onBack }: { onBack: () => void }) {
             </div>
           </div>
           <button onClick={onBack}
-            style={{ padding: "5px 18px", border: "1px solid rgba(255,255,255,0.45)", background: "transparent", color: WH, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: F }}>
+            style={{ padding: "7px 18px", border: "none", background: AMB, color: "#1a1a2e", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: F }}
+            onMouseEnter={e => { e.currentTarget.style.background = RD; e.currentTarget.style.color = WH; }}
+            onMouseLeave={e => { e.currentTarget.style.background = AMB; e.currentTarget.style.color = "#1a1a2e"; }}>
             ← Back to Home
           </button>
         </div>
@@ -484,29 +551,44 @@ function IntelligencePlatform({ view, setView }: { view: AppView; setView: (v: A
   const [query, setQuery] = useState("");
   const [messages, setMessages] = useState<{ role: "user" | "ai"; text: string }[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [recentQueries, setRecentQueries] = useState<{ id: number; title: string; time: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSearch(q: string) {
     if (!q.trim() || isLoading) return;
-    const userMsg = q.trim();
-    setQuery("");
+
+    // Immediately show user message and a loading placeholder
+    setMessages(prev => [...prev, { role: "user", text: q }]);
+    setRecentQueries(prev => {
+      const entry = { id: Date.now(), title: q.trim(), time: "Just now" };
+      return [entry, ...prev.filter(r => r.title !== q.trim())].slice(0, 8);
+    });
     setView("chatbot");
-    setMessages(prev => [...prev, { role: "user", text: userMsg }]);
+    setQuery("");
     setIsLoading(true);
+
     try {
-      const resp = await fetch("http://127.0.0.1:5000/api/chat", {
+      const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: userMsg,
-          system_prompt: "You are the KSP Intelligence Engine, an AI assistant for Karnataka State Police. Answer questions about crime trends, suspect data, FIR records, and district intelligence directly and factually."
+          message: q,
+          system_prompt:
+            "You are the KSP Intelligence Engine, an AI assistant for Karnataka State Police officers. Answer questions about crime trends, FIR data, suspect analysis, and district intelligence clearly and factually.",
         }),
       });
-      const data = await resp.json();
-      const aiText = data.response ?? data.error ?? "No response received.";
+      const data = await res.json();
+      const aiText = data.response
+        ? data.response.trim()
+        : data.error
+        ? `⚠ Backend error: ${data.error}`
+        : "⚠ No response from the intelligence engine.";
       setMessages(prev => [...prev, { role: "ai", text: aiText }]);
-    } catch {
-      setMessages(prev => [...prev, { role: "ai", text: "⚠ Unable to reach the KSP Intelligence Engine. Please ensure the backend server is running (python app.py)." }]);
+    } catch (err) {
+      setMessages(prev => [
+        ...prev,
+        { role: "ai", text: "⚠ Could not reach the backend. Make sure app.py is running on port 5000." },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -549,21 +631,26 @@ function IntelligencePlatform({ view, setView }: { view: AppView; setView: (v: A
         </nav>
 
         {/* Recent */}
-        <div style={{ padding: "10px 16px 4px", flex: 1, overflow: "hidden" }}>
+        <div style={{ padding: "10px 16px 4px", flex: 1, overflow: "auto" }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", marginBottom: 8 }}>Recent Queries</div>
-          {RECENT_CHATS.map(c => (
-            <button key={c.id} onClick={() => setView("chatbot")}
-              style={{ display: "flex", gap: 8, padding: "6px 0", border: "none", background: "transparent", color: "rgba(255,255,255,0.38)", cursor: "pointer", fontSize: 11, textAlign: "left", width: "100%", fontFamily: F, overflow: "hidden" }}>
-              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>{c.title}</span>
-              <span style={{ fontSize: 10, opacity: 0.5, flexShrink: 0 }}>{c.time}</span>
-            </button>
-          ))}
+          {recentQueries.length === 0
+            ? <p style={{ fontSize: 11, color: "rgba(255,255,255,0.2)", margin: 0 }}>No queries yet.</p>
+            : recentQueries.map(c => (
+              <button key={c.id} onClick={() => setView("chatbot")}
+                style={{ display: "flex", gap: 8, padding: "6px 0", border: "none", background: "transparent", color: "rgba(255,255,255,0.38)", cursor: "pointer", fontSize: 11, textAlign: "left", width: "100%", fontFamily: F, overflow: "hidden" }}>
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>{c.title}</span>
+                <span style={{ fontSize: 10, opacity: 0.5, flexShrink: 0 }}>{c.time}</span>
+              </button>
+            ))
+          }
         </div>
 
         {/* Footer */}
         <div style={{ padding: "10px 16px 16px", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
           <button onClick={() => setView("landing" as AppView)}
-            style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.3)", fontSize: 11, fontFamily: F, padding: 0, marginBottom: 10, display: "block" }}>
+            style={{ background: AMB, border: "none", cursor: "pointer", color: "#1a1a2e", fontSize: 12, fontFamily: F, fontWeight: 700, padding: "8px 14px", marginBottom: 12, display: "block", width: "100%", textAlign: "left", letterSpacing: "0.01em" }}
+            onMouseEnter={e => { e.currentTarget.style.background = RD; e.currentTarget.style.color = WH; }}
+            onMouseLeave={e => { e.currentTarget.style.background = AMB; e.currentTarget.style.color = "#1a1a2e"; }}>
             ← Back to Home
           </button>
           <div style={{ fontSize: 12, color: WH, fontWeight: 600 }}>Insp. K. Rajesh</div>
@@ -584,7 +671,7 @@ function IntelligencePlatform({ view, setView }: { view: AppView; setView: (v: A
         </header>
 
         <main style={{ flex: 1, overflow: "auto" }}>
-          {view === "chatbot"    && <ChatbotView query={query} setQuery={setQuery} onSearch={handleSearch} messages={messages} isLoading={isLoading} />}
+          {view === "chatbot"    && <ChatbotView query={query} setQuery={setQuery} onSearch={handleSearch} messages={messages} recentQueries={recentQueries} isLoading={isLoading} />}
           {view === "dashboards" && <DashboardsView />}
           {view === "settings"   && <SettingsView />}
         </main>
@@ -593,22 +680,60 @@ function IntelligencePlatform({ view, setView }: { view: AppView; setView: (v: A
   );
 }
 
+/* ─── Query input (top-level to prevent remount on each keystroke) ── */
+function QueryInput({ query, setQuery, onSearch, listening, toggleVoice, fileRef, compact }: {
+  query: string;
+  setQuery: (v: string) => void;
+  onSearch: (q: string) => void;
+  listening: boolean;
+  toggleVoice: () => void;
+  fileRef: React.RefObject<HTMLInputElement>;
+  compact?: boolean;
+}) {
+  return (
+    <div style={{ display: "flex", width: "100%", maxWidth: compact ? 680 : 700, border: `1px solid ${listening ? RD : BD}`, background: BG, alignItems: "flex-end" }}>
+      <input ref={fileRef} type="file" style={{ display: "none" }} multiple accept=".pdf,.doc,.docx,.csv,.txt,.jpg,.png" />
+      <button onClick={() => fileRef.current?.click()} title="Attach file"
+        style={{ border: "none", borderRight: `1px solid ${BD}`, background: "transparent", color: MU, cursor: "pointer", padding: "0 11px", alignSelf: "stretch", display: "flex", alignItems: "center" }}>
+        <Paperclip size={14} />
+      </button>
+      <textarea
+        value={query}
+        onChange={e => { setQuery(e.target.value); e.target.style.height = "auto"; e.target.style.height = e.target.scrollHeight + "px"; }}
+        onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSearch(query); } }}
+        placeholder={listening ? "Listening…" : "Ask about crime trends, suspects, or district data..."}
+        rows={1}
+        style={{ flex: 1, border: "none", outline: "none", background: "transparent", padding: compact ? "9px 12px" : "11px 14px", fontSize: compact ? 13 : 14, color: TX, fontFamily: F, resize: "none", lineHeight: 1.5, maxHeight: 120, overflow: "auto" }}
+      />
+      {query && !listening && (
+        <button onClick={() => setQuery("")} style={{ border: "none", background: "transparent", cursor: "pointer", color: MU, padding: "0 8px", alignSelf: "flex-end", paddingBottom: 10 }}>
+          <X size={12} />
+        </button>
+      )}
+      <button onClick={toggleVoice}
+        style={{ border: "none", borderLeft: `1px solid ${BD}`, background: listening ? RD : "transparent", color: listening ? WH : MU, cursor: "pointer", padding: "0 12px", alignSelf: "stretch" }}>
+        {listening ? <MicOff size={14} /> : <Mic size={14} />}
+      </button>
+      <button onClick={() => onSearch(query)} disabled={!query.trim()}
+        style={{ border: "none", borderLeft: `1px solid ${BD}`, background: query.trim() ? NAV : "#edf0f5", color: query.trim() ? WH : MU, cursor: query.trim() ? "pointer" : "not-allowed", padding: "0 20px", fontSize: 12, fontWeight: 600, fontFamily: F, alignSelf: "stretch" }}>
+        Submit
+      </button>
+    </div>
+  );
+}
+
 /* ─── Chatbot view ────────────────────────────────────────── */
-function ChatbotView({ query, setQuery, onSearch, messages, isLoading }: {
+function ChatbotView({ query, setQuery, onSearch, messages, recentQueries, isLoading }: {
   query: string;
   setQuery: (v: string) => void;
   onSearch: (q: string) => void;
   messages: { role: "user" | "ai"; text: string }[];
-  isLoading: boolean;
+  recentQueries: { id: number; title: string; time: string }[];
+  isLoading?: boolean;
 }) {
-  const isEmpty = messages.length === 0 && !isLoading;
+  const isEmpty = messages.length === 0;
   const [listening, setListening] = useState(false);
   const recRef = useRef<any>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
 
   function toggleVoice() {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -643,38 +768,6 @@ function ChatbotView({ query, setQuery, onSearch, messages, isLoading }: {
 
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const QueryInput = ({ compact }: { compact?: boolean }) => (
-    <div style={{ display: "flex", width: "100%", maxWidth: compact ? 680 : 700, border: `1px solid ${listening ? RD : BD}`, background: BG }}>
-      {/* File upload */}
-      <input ref={fileRef} type="file" style={{ display: "none" }} multiple accept=".pdf,.doc,.docx,.csv,.txt,.jpg,.png" />
-      <button onClick={() => fileRef.current?.click()} title="Attach file"
-        style={{ border: "none", borderRight: `1px solid ${BD}`, background: "transparent", color: MU, cursor: "pointer", padding: "0 11px", display: "flex", alignItems: "center" }}>
-        <Paperclip size={14} />
-      </button>
-      <input
-        type="text"
-        value={query}
-        onChange={e => setQuery(e.target.value)}
-        onKeyDown={e => e.key === "Enter" && onSearch(query)}
-        placeholder={listening ? "Listening…" : "Ask about crime trends, suspects, or district data..."}
-        style={{ flex: 1, border: "none", outline: "none", background: "transparent", padding: compact ? "9px 12px" : "11px 14px", fontSize: compact ? 13 : 14, color: TX, fontFamily: F }}
-      />
-      {query && !listening && (
-        <button onClick={() => setQuery("")} style={{ border: "none", background: "transparent", cursor: "pointer", color: MU, padding: "0 8px" }}>
-          <X size={12} />
-        </button>
-      )}
-      <button onClick={toggleVoice}
-        style={{ border: "none", borderLeft: `1px solid ${BD}`, background: listening ? RD : "transparent", color: listening ? WH : MU, cursor: "pointer", padding: "0 12px" }}>
-        {listening ? <MicOff size={14} /> : <Mic size={14} />}
-      </button>
-      <button onClick={() => onSearch(query)} disabled={!query.trim()}
-        style={{ border: "none", borderLeft: `1px solid ${BD}`, background: query.trim() ? NAV : "#edf0f5", color: query.trim() ? WH : MU, cursor: query.trim() ? "pointer" : "not-allowed", padding: "0 20px", fontSize: 12, fontWeight: 600, fontFamily: F }}>
-        Submit
-      </button>
-    </div>
-  );
-
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       {isEmpty ? (
@@ -688,7 +781,7 @@ function ChatbotView({ query, setQuery, onSearch, messages, isLoading }: {
             Query crime trends, suspect profiles, FIR records, and district intelligence using plain English.
           </p>
 
-          <QueryInput />
+          <QueryInput query={query} setQuery={setQuery} onSearch={onSearch} listening={listening} toggleVoice={toggleVoice} fileRef={fileRef} />
 
           <div style={{ display: "flex", flexDirection: "column", gap: 0, marginTop: 20, width: "100%", maxWidth: 700 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: MU, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>Suggested queries:</div>
@@ -727,20 +820,25 @@ function ChatbotView({ query, setQuery, onSearch, messages, isLoading }: {
                 <div style={{ width: 28, height: 28, background: "#eef2f8", border: `1px solid ${BD}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <span style={{ color: NAV, fontSize: 9, fontWeight: 700 }}>AI</span>
                 </div>
-                <div style={{ padding: "10px 14px", background: WH, border: `1px solid ${BD}`, borderLeft: `3px solid ${AMB}`, fontSize: 13, color: MU, fontStyle: "italic" }}>
+                <div style={{ padding: "10px 14px", background: WH, border: `1px solid ${BD}`, borderLeft: `3px solid ${AMB}`, fontSize: 13, color: MU, fontFamily: F }}>
                   <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: AD, marginBottom: 6 }}>KSP Intelligence Engine v2.4</div>
-                  Analysing intelligence records…
+                  <span style={{ display: "inline-flex", gap: 4 }}>
+                    <span style={{ animation: "dot-blink 1.2s 0s infinite" }}>●</span>
+                    <span style={{ animation: "dot-blink 1.2s 0.4s infinite" }}>●</span>
+                    <span style={{ animation: "dot-blink 1.2s 0.8s infinite" }}>●</span>
+                  </span>
                 </div>
               </div>
             )}
-            <div ref={bottomRef} />
-            <div style={{ paddingTop: 10, borderTop: `1px solid ${BD}` }}>
-              <span style={{ fontSize: 11, color: MU }}>Live · Powered by Zoho Catalyst AI</span>
-            </div>
+            {!isLoading && messages.length > 0 && (
+              <div style={{ paddingTop: 10, borderTop: `1px solid ${BD}` }}>
+                <span style={{ fontSize: 11, color: MU }}>Analysis complete · 3 data sources consulted</span>
+              </div>
+            )}
           </div>
 
           <div style={{ padding: "12px 24px", background: BG, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
-            <QueryInput compact />
+            <QueryInput compact query={query} setQuery={setQuery} onSearch={onSearch} listening={listening} toggleVoice={toggleVoice} fileRef={fileRef} />
             <button onClick={exportPDF}
               style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 14px", border: `1px solid ${BD}`, background: BG, color: TX, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: F, flexShrink: 0, height: 38 }}>
               <Download size={12} /> Export PDF
