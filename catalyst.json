@@ -1,0 +1,18 @@
+{
+  "appsail": [
+    {
+      "name": "app1",
+      "source": "backend"
+    }
+  ],
+  "slate": [
+    {
+      "name": "app2",
+      "source": "frontend",
+      "installCommand": "npm install",
+      "buildCommand": "npm run build",
+      "buildPath": "dist",
+      "devCommand": "npm run dev -- --port $ZC_SLATE_PORT"
+    }
+  ]
+}

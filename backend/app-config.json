@@ -1,0 +1,9 @@
+{
+	"stack": "python_3_12",
+	"command": "python3 app.py",
+	"buildPath": ".",
+	"memory": 256,
+	"scripts": {
+		"predeploy": "python3 -m pip install -r requirements.txt -t ."
+	}
+}
